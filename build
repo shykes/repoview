@@ -1,0 +1,35 @@
+#!/bin/sh
+
+set -e
+set -x
+
+if [ $# -lt 2 ]; then
+	echo "Usage: $0 src dst"
+	exit 1
+fi
+
+SRC=$1
+DST=$2
+
+find $SRC -name '*.md' -printf '%h/%f\n%P\n' | {
+	while true; do
+		read src || return 0
+		read dst || return 0
+		mkdir -p `dirname $DST/$dst`
+		echo > $DST/$dst.html
+		cat <<EOF >> $DST/$dst.html
+<!DOCTYPE html>
+<html>
+<title>$dst</title>
+<xmp theme="spacelab" style="display:none;">
+EOF
+		cat $src >> $DST/$dst.html
+		cat <<EOF >> $DST/$dst.html
+</xmp>
+<script src="http://strapdownjs.com/v/0.2/strapdown.js"></script>
+</html>
+EOF
+	done
+}
+
+true
